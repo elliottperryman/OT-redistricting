@@ -17,5 +17,6 @@ ensipc333 at /scratch/OT\_redistricting
 host: vpn-etu.ensimag.fr
 username and password same as school username and password
 
-
+## How the data is fetched:
+data/get.sh
 
