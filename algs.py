@@ -5,24 +5,33 @@ import fiona
 import shapely
 import geopandas
 
-def load_pop_df(state_num, discrete=True):
-    try: 
+def load_pop_df(state_num):
+    try:
         df = geopandas.read_file('data/tl_2020_'+str(state_num).zfill(2)+'_tabblock20.shp')
     except Exception as err:
-        print('exception. probably state number does not exist')
-        raise err
-    # only worry about regions with population 
+        raise FileNotFoundError('exception. probably state number does not exist')
+       # raise err
+    # only worry about regions with population
     df = df[df['POP20']>0]
+    # count total people in region 
     total_people = df['POP20'].sum()
+    # create template to grab features from
     df = geopandas.GeoDataFrame({
-        'state': df['STATEFP20'].astype(int),
         'county': df['COUNTYFP20'].astype(int),
         'tract': df['TRACTCE20'].astype(int), 
+        'block': df['BLOCKCE20'].astype(int),
         'pop': df['POP20'].astype(float)/total_people, 
-        })  
-    return df
-def blur(df, level='tract'):
-    pass
+        'geometry': df['geometry'], 
+        })
+    # create hierarchy of structures
+    county_df = (df[['county', 'pop', 'geometry']]).dissolve('county', aggfunc='sum')
+    tract_df = (df[['tract', 'pop', 'geometry']]).dissolve('tract', aggfunc='sum')
+    block_df = df[['block', 'pop', 'geometry']]
+    return block_df, tract_df, county_df
+
+def discrete(df):
+    df['geometry'] = df['geometry'].centroid
+
 """
 def sinkhorn(C, ϵ, MAX_ITER = 1000, verbose = True):
 
