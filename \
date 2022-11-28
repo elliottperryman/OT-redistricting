@@ -21,8 +21,6 @@ def load_pop_df(state_num, discrete=True):
         'pop': df['POP20'].astype(float)/total_people, 
         })  
     return df
-def blur(df, level='tract'):
-    pass
 """
 def sinkhorn(C, ϵ, MAX_ITER = 1000, verbose = True):
 
