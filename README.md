@@ -2,13 +2,13 @@
 
 ## How to use:
  * start vpn
- * ssh to username@ensipc333.ensimag.fr
+ * ssh to username@ensipc175.ensimag.fr
  * cd /scratch/OT\_redistricting/
  * source start.sh (all packages installed into anaconda base) 
 
 ## How to start an ensipc computer
 send email to "ensipc-wake" <ensipc-wake@ensimag.fr>
-with content: ensipc333
+with content: ensipc175
 
 ## where is this data stored?
 ensipc333 at /scratch/OT\_redistricting
