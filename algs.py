@@ -134,6 +134,7 @@ def solve_discrete(df, state_geometry, K, centers=None):
     res = sinkhorn(C, 1e-3, a, b)
     # agglomerate result (approximating each as binary allocation!) 
     df2 = df.copy()
+    # if more than 1% goes to another district, put it in the "split" pile
     split = (res.T/res.sum(1)).T.max(1)<0.99
     dist = res.argmax(1)
     dist[split] = -1
@@ -153,9 +154,11 @@ def lloyd_alg(state_num,K,lvl='tract'):
     sinkhorn_res, df_res, cost_res, centers = [], [], [], []
     for i in range(10):
         if i == 0:
-            a,b,c,d = solve_discrete(df, state, 3)
+            a, b, c, d = solve_discrete(df, state, K)
         else:
-            a,b,c,d = solve_discrete(df, state, 3, df_res[-1]['geometry'].centroid.values)
+            a, b, c, d = solve_discrete(df, state, K, df_res[-1]['geometry'].centroid.values)
+        if np.isnan(a).any():
+            raise RuntimeError('nan values in sinkhorn method. results not trustworthy')
         sinkhorn_res.append(a)
         df_res.append(b)
         cost_res.append(c)
