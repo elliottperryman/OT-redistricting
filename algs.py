@@ -57,11 +57,6 @@ def load_pop_df(state_num):
     state = state_df['geometry'].values[0]
     return block_df, tract_df, county_df, state
 
-
-# def discrete(df):
-#     df['geometry'] = df['geometry'].centroid # to_crs(3857).centroid.to_crs(epsg=4326)
-#     return df
-
 def rand_guess(state):
     """
     rand_guess puts a point randomly in the box surrounding the state
@@ -106,11 +101,6 @@ def compile():
     a, b = np.ones(4)/2, np.ones(2)
     cost(C,sinkhorn(C, 1e-2, a, b))
 compile()
-
-# you can 
-# def plot(res, df, name):
-#     df.plot(column=res.argmax(1), categorical=True)
-#     plt.savefig(name)
 
 def solve_discrete(df, state_geometry, K, centers=None):
     """

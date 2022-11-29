@@ -20,3 +20,9 @@ username and password same as school username and password
 ## How the data is fetched:
 data/get.sh
 
+## How to plot data:
+    with a GeoDataFrame:
+        * df.plot(column=df.index.values, categorical=True, legend=True)
+        * df.plot(column='district', categorical=True, legend=True)
+        * df.plot(column=districts, categorical=True, legend=True)
+
