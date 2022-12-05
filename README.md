@@ -26,3 +26,9 @@ data/get.sh
         * df.plot(column='district', categorical=True, legend=True)
         * df.plot(column=districts, categorical=True, legend=True)
 
+## Known Bugs:
+ * I forgot to make the centroids weighted by population
+ * The earth is not flat
+    * figure out how to convert to flat earth
+    * figure out the right projections (seems hard as projection depends on location)
+ * I think I should start the centroids by sampling from population(X)
