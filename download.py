@@ -1,6 +1,10 @@
+# unzip the files
 import zipfile
+# http request for the download
 import requests
 import os
+import shutil
+# creates tempdirectory for download and unzipping
 import tempfile
 
 def download_state_number(int:state_number):
@@ -78,5 +82,15 @@ def download_state_number(int:state_number):
         with ZipFile(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "r") as zip_archive:
             zip_archive.extractall(path=dirpath)
 
-#TODO : implement the retrieval of file of interest and copy it to the directory
+        end_directory = f"{os.getcwd()}/data"
+        start_fileName = f"{dirpath}/tl_2020_{state_number:02d}_tabblock20.shp"
+        end_fileName = f"{os.getcwd()}/data/tl_2020_{state_number:02d}_tabblock20.shp"
+# tests the existence of data directory
+        if !os.path.isdir():
+            os.mkdir(f"{os.getcwd()}/data")
+
+        with open(end_fileName, 'wb') as end_file:
+            with open(start_fileName, 'rb') as start_file:
+                shutil.copyfileobj(end_file, start_file)
+
 #TODO : implement tqdm wrapattr for a nice progress bar
