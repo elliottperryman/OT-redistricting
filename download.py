@@ -77,7 +77,7 @@ def download_shapefile_bynumber(state_number):
     if os.path.isdir(datadir):
         # tests if the file is already there
         if os.path.isfile(f"{datadir}/{fileName}"):
-            print "State already downloaded."
+            print("State already downloaded.")
             return
     else:
             os.mkdir(datadir)
