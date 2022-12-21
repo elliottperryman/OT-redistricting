@@ -81,7 +81,7 @@ def download_state_number(state_number):
             for chunk in http_response.iter_content(chunk_size=1024):
                 if chunk:
                     zip_archive.write(chunk)
-                    pbar.update(len(data))
+                    pbar.update(len(chunk))
 
         ## UNZIPPING THE ARCHIVE
         with zipfile.ZipFile(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "r") as zip_archive:
