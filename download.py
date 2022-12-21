@@ -74,29 +74,24 @@ def download_state_number(state_number):
         ## DOWNLOADING THE ZIP ARCHIVE
         # big files so setting stream to true to keep connection active
         http_response = requests.get(f"https://www2.census.gov/geo/tiger/TIGER2020/TABBLOCK20/tl_2020_{state_number:02d}_tabblock20.zip", stream=True)
-        file_size = int(http_response.headers['content-length'])
+        zipfile_size = int(http_response.headers['content-length'])
+
         zipfile_path = f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip"
 
         # Open as binary to write the chunks in
-        with open(zipfile_path, "wb") as zip_archive, tqdm(total=file_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading Zipfile", colour="green") as pbar :
+        with open(zipfile_path, "wb") as file, tqdm(total=zipfile_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading Zipfile", colour="green") as pbar :
             for chunk in http_response.iter_content(chunk_size=1024):
-                zip_archive.write(chunk)
+                file.write(chunk)
                 pbar.update(len(chunk))
 
-        ## UNZIPPING THE ARCHIVE
-        with zipfile.ZipFile(zipfile_path, "r") as zip_archive:
-            zip_archive.extractall(path=dirpath)
+        fileName = "tl_2020_{state_number:02d}_tabblock20.shp"
+        datadir = f"{os.getcwd()}/data"
+        datadir_filePath = f"{datadir}/tl_2020_{fileName}"
 
-        end_directory = f"{os.getcwd()}/data"
-        start_fileName = f"{dirpath}/tl_2020_{state_number:02d}_tabblock20.shp"
-        end_fileName = f"{os.getcwd()}/data/tl_2020_{state_number:02d}_tabblock20.shp"
-        ## MOVING THE SHAPEFILE TO DATA/
         # tests the existence of data directory
-        if not os.path.isdir():
-            os.mkdir(f"{os.getcwd()}/data")
+        if not os.path.isdir(datadir):
+            os.mkdir(datadir)
 
-        with open(end_fileName, 'wb') as end_file:
-            with open(start_fileName, 'rb') as start_file:
-                shutil.copyfileobj(end_file, start_file)
-
-#TODO : implement tqdm wrapattr for a nice progress bar
+        ## UNZIPPING THE FILE TO DATA FOLDER
+        with zipfile.ZipFile(zipfile_path, "r") as file:
+            file.extract(member=fileName, path=datadir_filePath)
