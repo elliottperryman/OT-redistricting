@@ -6,8 +6,10 @@ import os
 import shutil
 # creates tempdirectory for download and unzipping
 import tempfile
+# nice progress bars
+from tqdm import tqdm
 
-def download_state_number(int:state_number):
+def download_state_number(state_number):
     """
     Download US states shapefiles data from 
     https://www2.census.gov/geo/tiger/TIGER2020/TABBlOCK20/
@@ -67,26 +69,30 @@ def download_state_number(int:state_number):
         72_PUERTO_RICO
     """
 
+    # Opens a tempdir to download the file and unzip it
     with tempfile.TemporaryDirectory() as dirpath:
         ## DOWNLOADING THE ZIP ARCHIVE
         # big files so setting stream to true to keep connection active
         http_response = requests.get(f"https://www2.census.gov/geo/tiger/TIGER2020/TABBlOCK20/tl_2020_{state_number:02d}_tabblock20.zip", stream=True)
+        file_size = int(http_response.headers.get('content-length'))
 
         # Open as binary to write the chunks in
-        with open(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "wb") as zip_archive:
+        with open(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "wb") as zip_archive, tqdm(total=file_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading zipfile", colour="green") as pbar :
             for chunk in http_response.iter_content(chunk_size=1024):
                 if chunk:
                     zip_archive.write(chunk)
+                    pbar.update(len(data))
 
         ## UNZIPPING THE ARCHIVE
-        with ZipFile(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "r") as zip_archive:
+        with zipfile.ZipFile(f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip", "r") as zip_archive:
             zip_archive.extractall(path=dirpath)
 
         end_directory = f"{os.getcwd()}/data"
         start_fileName = f"{dirpath}/tl_2020_{state_number:02d}_tabblock20.shp"
         end_fileName = f"{os.getcwd()}/data/tl_2020_{state_number:02d}_tabblock20.shp"
-# tests the existence of data directory
-        if !os.path.isdir():
+        ## MOVING THE SHAPEFILE TO DATA/
+        # tests the existence of data directory
+        if not os.path.isdir():
             os.mkdir(f"{os.getcwd()}/data")
 
         with open(end_fileName, 'wb') as end_file:
