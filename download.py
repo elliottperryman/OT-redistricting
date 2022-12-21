@@ -84,9 +84,9 @@ def download_state_number(state_number):
                 file.write(chunk)
                 pbar.update(len(chunk))
 
-        fileName = "tl_2020_{state_number:02d}_tabblock20.shp"
+        # Define the end directory where the the shapefile is extracted to
+        fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
         datadir = f"{os.getcwd()}/data"
-        datadir_filePath = f"{datadir}/tl_2020_{fileName}"
 
         # tests the existence of data directory
         if not os.path.isdir(datadir):
@@ -94,4 +94,4 @@ def download_state_number(state_number):
 
         ## UNZIPPING THE FILE TO DATA FOLDER
         with zipfile.ZipFile(zipfile_path, "r") as file:
-            file.extract(member=fileName, path=datadir_filePath)
+            file.extract(member=fileName, path=datadir)
