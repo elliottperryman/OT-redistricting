@@ -73,12 +73,12 @@ def download_state_number(state_number):
     with tempfile.TemporaryDirectory() as dirpath:
         ## DOWNLOADING THE ZIP ARCHIVE
         # big files so setting stream to true to keep connection active
-        http_response = requests.get(f"https://www2.census.gov/geo/tiger/TIGER2020/TABBlOCK20/tl_2020_{state_number:02d}_tabblock20.zip", stream=True)
-        file_size = int(http_response.headers.get('content-length'))
+        http_response = requests.get(f"https://www2.census.gov/geo/tiger/TIGER2020/TABBLOCK20/tl_2020_{state_number:02d}_tabblock20.zip", stream=True)
+        file_size = int(http_response.headers['content-length'])
         zipfile_path = f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip"
 
         # Open as binary to write the chunks in
-        with open(zipfile_path, "wb") as zip_archive, tqdm(total=file_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading zipfile", colour="green") as pbar :
+        with open(zipfile_path, "wb") as zip_archive, tqdm(total=file_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading Zipfile", colour="green") as pbar :
             for chunk in http_response.iter_content(chunk_size=1024):
                 zip_archive.write(chunk)
                 pbar.update(len(chunk))
