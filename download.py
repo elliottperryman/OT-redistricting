@@ -2,9 +2,9 @@
 import zipfile
 # http request for the download
 import requests
+# get the currend working directory
 import os
-import shutil
-# creates tempdirectory for download and unzipping
+# creates a temp directory for the download
 import tempfile
 # nice progress bars
 from tqdm import tqdm
