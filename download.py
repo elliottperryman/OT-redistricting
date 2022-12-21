@@ -69,6 +69,19 @@ def download_shapefile_bynumber(state_number):
         72_PUERTO_RICO
     """
 
+    # Define the end directory where the the shapefile is extracted to
+    fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
+    datadir = f"{os.getcwd()}/data"
+
+    # tests the existence of data directory
+    if os.path.isdir(datadir):
+        # tests if the file is already there
+        if os.path.isfile(f"{datadir}/{fileName}"):
+            print "State already downloaded."
+            return
+    else:
+            os.mkdir(datadir)
+
     # Opens a tempdir to download the file and unzip it
     with tempfile.TemporaryDirectory() as dirpath:
         ## DOWNLOADING THE ZIP ARCHIVE
@@ -83,14 +96,6 @@ def download_shapefile_bynumber(state_number):
             for chunk in http_response.iter_content(chunk_size=1024):
                 file.write(chunk)
                 pbar.update(len(chunk))
-
-        # Define the end directory where the the shapefile is extracted to
-        fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
-        datadir = f"{os.getcwd()}/data"
-
-        # tests the existence of data directory
-        if not os.path.isdir(datadir):
-            os.mkdir(datadir)
 
         ## UNZIPPING THE FILE TO DATA FOLDER
         with zipfile.ZipFile(zipfile_path, "r") as file:
