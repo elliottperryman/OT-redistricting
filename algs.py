@@ -25,14 +25,18 @@ def load_pop_df(state_num):
     if there is a file not found error, try running get.sh to download data
         or check that the state number exists
     """
+
+    # try to download the shapefile associated to the given state 
+    # Catch an error if the state number does not exist
     try:
         download_shapefile_bynumber(state_num)
-        df = geopandas.read_file('data/tl_2020_'+str(state_num).zfill(2)+'_tabblock20.shp')
     except ShapeFileAlreadyDownloadedError:
-        df = geopandas.read_file('data/tl_2020_'+str(state_num).zfill(2)+'_tabblock20.shp')
+        pass
     except StateNumberDoesNotExistError as e:
         print(e)
         raise StateNumberDoesNotExistError()
+
+    df = geopandas.read_file('data/tl_2020_'+str(state_num).zfill(2)+'_tabblock20.shp')
 
     # only worry about regions with population
     df = df[df['POP20']>0]
