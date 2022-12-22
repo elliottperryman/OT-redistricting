@@ -27,6 +27,10 @@ def download_shapefile_bynumber(state_number):
     Download and unzip the file, removes unnecessary files only keeping the shapefile.
     """
 
+    # tests whether the state_number exists
+    if not state_number in states_dict.items:
+        raise StateNumberDoesNotExistError(state_num)
+
     # Define the end directory where the the shapefile is extracted to
     fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
     datadir = f"{os.getcwd()}/data"
