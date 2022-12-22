@@ -13,64 +13,18 @@ class ShapeFileAlreadyDownloadedError(Exception):
     def __init__(self):
         super().__init__("State Shapefile already downloaded.")
 
+class StateNumberDoesNotExistError(Exception, nb):
+    def __init__(self, nb):
+        super().__init__(f"The given number ({nb}) does not represent a state.")
+        self.number = nb
+
+states_dict= { "ALABAMA": 1, "ALASKA": 2, "ARIZONA": 4, "ARKANSAS": 5, "CALIFORNIA": 6, "COLORADO": 8, "CONNECTICUT": 9, "DELAWARE": 10, "DISTRICT_OF_COLUMBIA": 11, "FLORIDA": 12, "GEORGIA": 13, "HAWAII": 15, "IDAHO": 16, "ILLINOIS": 17, "INDIANA": 18, "IOWA": 19, "KANSAS": 20, "KENTUCKY": 21, "LOUISIANA": 22, "MAINE": 23, "MARYLAND": 24, "MASSACHUSETTS": 25, "MICHIGAN": 26, "MINNESOTA": 27, "MISSISSIPPI": 28, "MISSOURI": 29, "MONTANA": 30, "NEBRASKA": 31, "NEVADA": 32, "NEW_HAMPSHIRE": 33, "NEW_JERSEY": 34, "NEW_MEXICO": 35, "NEW_YORK": 36, "NORTH_CAROLINA": 37, "NORTH_DAKOTA": 38, "OHIO": 39, "OKLAHOMA": 40, "OREGON": 41, "PENNSYLVANIA": 42, "RHODE_ISLAND": 44, "SOUTH_CAROLINA": 45, "SOUTH_DAKOTA": 46, "TENNESSEE": 47, "TEXAS": 48, "UTAH": 49, "VERMONT": 50, "VIRGINIA": 51, "WASHINGTON": 53, "WEST_VIRGINIA": 54, "WISCONSIN": 55, "WYOMING": 56, "PUERTO_RICO": 72}
+
 def download_shapefile_bynumber(state_number):
     """
     Download US states shapefiles data from 
     https://www2.census.gov/geo/tiger/TIGER2020/TABBlOCK20/
     Download and unzip the file, removes unnecessary files only keeping the shapefile.
-    Corresponding state number :
-        01_ALABAMA
-        02_ALASKA
-        04_ARIZONA
-        05_ARKANSAS
-        06_CALIFORNIA
-        08_COLORADO
-        09_CONNECTICUT
-        10_DELAWARE
-        11_DISTRICT_OF_COLUMBIA
-        12_FLORIDA
-        13_GEORGIA
-        15_HAWAII
-        16_IDAHO
-        17_ILLINOIS
-        18_INDIANA
-        19_IOWA
-        20_KANSAS
-        21_KENTUCKY
-        22_LOUISIANA
-        23_MAINE
-        24_MARYLAND
-        25_MASSACHUSETTS
-        26_MICHIGAN
-        27_MINNESOTA
-        28_MISSISSIPPI
-        29_MISSOURI
-        30_MONTANA
-        31_NEBRASKA
-        32_NEVADA
-        33_NEW_HAMPSHIRE
-        34_NEW_JERSEY
-        35_NEW_MEXICO
-        36_NEW_YORK
-        37_NORTH_CAROLINA
-        38_NORTH_DAKOTA
-        39_OHIO
-        40_OKLAHOMA
-        41_OREGON
-        42_PENNSYLVANIA
-        44_RHODE_ISLAND
-        45_SOUTH_CAROLINA
-        46_SOUTH_DAKOTA
-        47_TENNESSEE
-        48_TEXAS
-        49_UTAH
-        50_VERMONT
-        51_VIRGINIA
-        53_WASHINGTON
-        54_WEST_VIRGINIA
-        55_WISCONSIN
-        56_WYOMING
-        72_PUERTO_RICO
     """
 
     # Define the end directory where the the shapefile is extracted to
@@ -109,7 +63,6 @@ def download_all_shapefiles():
     Helper function to download all states shapefiles.
     """
 
-    states_dict= { "ALABAMA": 1, "ALASKA": 2, "ARIZONA": 4, "ARKANSAS": 5, "CALIFORNIA": 6, "COLORADO": 8, "CONNECTICUT": 9, "DELAWARE": 10, "DISTRICT_OF_COLUMBIA": 11, "FLORIDA": 12, "GEORGIA": 13, "HAWAII": 15, "IDAHO": 16, "ILLINOIS": 17, "INDIANA": 18, "IOWA": 19, "KANSAS": 20, "KENTUCKY": 21, "LOUISIANA": 22, "MAINE": 23, "MARYLAND": 24, "MASSACHUSETTS": 25, "MICHIGAN": 26, "MINNESOTA": 27, "MISSISSIPPI": 28, "MISSOURI": 29, "MONTANA": 30, "NEBRASKA": 31, "NEVADA": 32, "NEW_HAMPSHIRE": 33, "NEW_JERSEY": 34, "NEW_MEXICO": 35, "NEW_YORK": 36, "NORTH_CAROLINA": 37, "NORTH_DAKOTA": 38, "OHIO": 39, "OKLAHOMA": 40, "OREGON": 41, "PENNSYLVANIA": 42, "RHODE_ISLAND": 44, "SOUTH_CAROLINA": 45, "SOUTH_DAKOTA": 46, "TENNESSEE": 47, "TEXAS": 48, "UTAH": 49, "VERMONT": 50, "VIRGINIA": 51, "WASHINGTON": 53, "WEST_VIRGINIA": 54, "WISCONSIN": 55, "WYOMING": 56, "PUERTO_RICO": 72}
     for state in states_dict:
         print(f"Downloading {state}...")
         try:
