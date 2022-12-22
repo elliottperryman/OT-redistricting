@@ -33,3 +33,4 @@ data/get.sh
     * figure out the right projections (seems hard as projection depends on location)
  * I think I should start the centroids by sampling from population(X)
  * the centers should be plotted as well
+ * the iterative algorithm doesn't work because of the -1 districts
