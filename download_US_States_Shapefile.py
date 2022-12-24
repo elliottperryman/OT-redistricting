@@ -30,7 +30,7 @@ def download_shapefile_bynumber(state_number):
     # tests whether the state_number exists
     if not state_number in states_dict.values():
         raise StateNumberDoesNotExistError(state_number)
-    state_name = list(states_dict.keys())[list(states_dict.values()).index(state_number)].capitalized()
+    state_name = list(states_dict.keys())[list(states_dict.values()).index(state_number)].capitalize()
 
     # Define the end directory where the the shapefile is extracted to
     datadir = f"{os.getcwd()}/data"
