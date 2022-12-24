@@ -11,6 +11,8 @@ import pandas as pd
 import fiona
 import shapely
 import geopandas
+
+# download data
 from download_US_States_Shapefile import download_shapefile_bynumber, ShapeFileAlreadyDownloadedError, StateNumberDoesNotExistError
 
 def load_pop_df(state_num):
@@ -36,7 +38,7 @@ def load_pop_df(state_num):
         print(e)
         raise StateNumberDoesNotExistError()
 
-    df = geopandas.read_file('data/tl_2020_'+str(state_num).zfill(2)+'_tabblock20.shp')
+    df = geopandas.read_file(f'data/{state_num:02d}/tl_2020_{state_num:02d}_tabblock20.shp')
 
     # only worry about regions with population
     df = df[df['POP20']>0]
