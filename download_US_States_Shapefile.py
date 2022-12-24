@@ -28,8 +28,8 @@ def download_shapefile_bynumber(state_number):
     """
 
     # tests whether the state_number exists
-    if not state_number in states_dict.items:
-        raise StateNumberDoesNotExistError(state_num)
+    if not state_number in states_dict.values():
+        raise StateNumberDoesNotExistError(state_number)
 
     # Define the end directory where the the shapefile is extracted to
     fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
@@ -60,7 +60,7 @@ def download_shapefile_bynumber(state_number):
 
         ## UNZIPPING THE FILE TO DATA FOLDER
         with zipfile.ZipFile(zipfile_path, "r") as file:
-            file.extract(member=fileName, path=datadir)
+            file.extractall(path=datadir)
 
 def download_all_shapefiles():
     """
