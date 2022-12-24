@@ -77,7 +77,7 @@ def download_shapefile_bynumber(state_number):
         ## UNZIPPING THE FILE TO DATA FOLDER
         with zipfile.ZipFile(zipfile_path, "r") as file:
             print("Unzipping archive...")
-            file.extractall(path=datadir)
+            file.extractall(path=f"{datadir}/{state_number:02d}")
             print("Done !")
 
 def download_all_shapefiles():
