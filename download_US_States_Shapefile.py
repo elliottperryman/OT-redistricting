@@ -30,10 +30,11 @@ def download_shapefile_bynumber(state_number):
     # tests whether the state_number exists
     if not state_number in states_dict.values():
         raise StateNumberDoesNotExistError(state_number)
+    state_name = list(states_dict.keys())[list(states_dict.values()).index(state_number)].capitalized()
 
     # Define the end directory where the the shapefile is extracted to
-    fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
     datadir = f"{os.getcwd()}/data"
+    fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
 
     # tests the existence of data directory
     if os.path.isdir(datadir):
@@ -53,14 +54,16 @@ def download_shapefile_bynumber(state_number):
         zipfile_path = f"{dirpath}/tl_2020_{state_number:02d}_tabblock.zip"
 
         # Open as binary to write the chunks in
-        with open(zipfile_path, "wb") as file, tqdm(total=zipfile_size, unit='iB', unit_scale=True, unit_divisor=1024, desc="Downloading Zipfile", colour="green") as pbar :
+        with open(zipfile_path, "wb") as file, tqdm(total=zipfile_size, unit='iB', unit_scale=True, unit_divisor=1024, desc=f"Downloading {state_name} Zipfile", colour="green") as pbar :
             for chunk in http_response.iter_content(chunk_size=1024):
                 file.write(chunk)
                 pbar.update(len(chunk))
 
         ## UNZIPPING THE FILE TO DATA FOLDER
         with zipfile.ZipFile(zipfile_path, "r") as file:
+            print("Unzipping archive...")
             file.extractall(path=datadir)
+            print("Done !")
 
 def download_all_shapefiles():
     """
