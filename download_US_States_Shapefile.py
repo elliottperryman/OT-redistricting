@@ -34,13 +34,28 @@ def download_shapefile_bynumber(state_number):
 
     # Define the end directory where the the shapefile is extracted to
     datadir = f"{os.getcwd()}/data"
-    fileName = f"tl_2020_{state_number:02d}_tabblock20.shp"
+    # Define the expected extracted files
+    fileNames = [
+            f"tl_2020_{state_number:02d}_tabblock20.shp",
+            f"tl_2020_{state_number:02d}_tabblock20.shx",
+            f"tl_2020_{state_number:02d}_tabblock20.cpg",
+            f"tl_2020_{state_number:02d}_tabblock20.dbf",
+            f"tl_2020_{state_number:02d}_tabblock20.prj",
+            f"tl_2020_{state_number:02d}_tabblock20.shp.ea.iso.xml",
+            f"tl_2020_{state_number:02d}_tabblock20.shp.iso.xml"
+            ]
 
     # tests the existence of data directory
     if os.path.isdir(datadir):
-        # tests if the file is already there
-        if os.path.isfile(f"{datadir}/{fileName}"):
-            raise ShapeFileAlreadyDownloadedError()
+        # tests if files are already there
+        for fileName in fileNames:
+            test = 0
+            # counts how many files are already there. If all are then they've already been downloaded.
+            # TODO: This should probably test the integrity of the files
+            if os.path.isfile(f"{datadir}/{state_number:02d}/{fileName}"):
+                test += 1
+            if test == len(fileNames):
+                raise ShapeFileAlreadyDownloadedError()
     else:
             os.mkdir(datadir)
 
