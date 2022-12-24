@@ -13,7 +13,7 @@ class ShapeFileAlreadyDownloadedError(Exception):
     def __init__(self):
         super().__init__("State Shapefile already downloaded.")
 
-class StateNumberDoesNotExistError(Exception, nb):
+class StateNumberDoesNotExistError(Exception):
     def __init__(self, nb):
         super().__init__(f"The given number ({nb}) does not represent a state.")
         self.number = nb
