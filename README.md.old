@@ -1,25 +1,32 @@
 # OT-redistricting
 
-This is an implementation of redistricting using Optimal Transport.
-
 ## How to use:
+ * start vpn
+ * ssh to username@ensipc175.ensimag.fr
+ * cd /scratch/OT\_redistricting/
+ * source start.sh (all packages installed into anaconda base) 
 
-source start.sh or install the environment manually with requirements.txt.
+## How to start an ensipc computer
+send email to "ensipc-wake" <ensipc-wake@ensimag.fr>
+with content: ensipc175
 
 ## where is this data stored?
+ensipc333 at /scratch/OT\_redistricting
 
-The data currently used comes from TIGER2020 a project of the US Census Bureau.
-You can learn more about it [here][https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2020.html#list-tab-JMJDQEOVO9RD9R31BU]
+## How to get vpn connected:
+host: vpn-etu.ensimag.fr
+username and password same as school username and password
+
+## How the data is fetched:
+data/get.sh
 
 ## How to plot data:
-
     with a GeoDataFrame:
         * df.plot(column=df.index.values, categorical=True, legend=True)
         * df.plot(column='district', categorical=True, legend=True)
         * df.plot(column=districts, categorical=True, legend=True)
 
 ## Known Bugs:
-
  * I forgot to make the centroids weighted by population
  * The earth is not flat
     * figure out how to convert to flat earth
