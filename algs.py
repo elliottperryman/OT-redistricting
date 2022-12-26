@@ -12,20 +12,21 @@ import fiona
 import shapely
 import geopandas
 
-# download data
+# download US data and possible errors
 from download_US_States_Shapefile import download_shapefile_bynumber, ShapeFileAlreadyDownloadedError, StateNumberDoesNotExistError
 
 def load_pop_df(state_num):
     """
-    load_pop_df loads the data for state identified by integer state_num
-    the output:
+    Loads the data for a given state identified by the (integer) argument state_num. 
+    For a list of corresponding state number, see states_dict in download_US_States_Shapefile.
+    Data is processed thanks to Geopandas as a GeoDataFrame. See website.
+
+    ~Output~: three "zoom levels" are outputed. They go from smallest to greatest.
         * dataframe of ['block', 'pop', 'geometry']
         * dataframe of ['tract', 'pop', 'geometry']
         * dataframe of ['county', 'pop', 'geometry']
-        * geometry of state (0 population areas excluded
+        * geometry of state (0 population areas excluded)
     
-    if there is a file not found error, try running get.sh to download data
-        or check that the state number exists
     """
 
     # try to download the shapefile associated to the given state 
@@ -40,7 +41,7 @@ def load_pop_df(state_num):
 
     df = geopandas.read_file(f'data/{state_num:02d}/tl_2020_{state_num:02d}_tabblock20.shp')
 
-    # only worry about regions with population
+    # only worry about regions with non-zero population
     df = df[df['POP20']>0]
     # count total people in region 
     total_people = df['POP20'].sum()
