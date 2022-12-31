@@ -48,14 +48,14 @@ def download_shapefile_bynumber(state_number):
     # tests the existence of data directory
     if os.path.isdir(datadir):
         # tests if files are already there
+        test = 0
         for fileName in fileNames:
-            test = 0
             # counts how many files are already there. If all are then they've already been downloaded.
             # TODO: This should probably test the integrity of the files
             if os.path.isfile(f"{datadir}/{state_number:02d}/{fileName}"):
                 test += 1
-            if test == len(fileNames):
-                raise ShapeFileAlreadyDownloadedError()
+        if test == len(fileNames):
+            raise ShapeFileAlreadyDownloadedError()
     else:
             os.mkdir(datadir)
 
