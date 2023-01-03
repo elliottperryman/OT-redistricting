@@ -14,7 +14,8 @@ You can learn more about it [here][https://www.census.gov/geographies/mapping-fi
 ## How to plot data:
 
     with a GeoDataFrame:
-        * df.plot(column=df.index.values, categorical=True, legend=True)
+     This one works !!!
+     `df.plot(column=df.index.values, categorical=True, legend=True)`
         * df.plot(column='district', categorical=True, legend=True)
         * df.plot(column=districts, categorical=True, legend=True)
 
