@@ -13,11 +13,7 @@ You can learn more about it [here](https://www.census.gov/geographies/mapping-fi
  * I think we should move to downloaded data. It removes wifi problems and all the associated problems
 
 ## To Do list:
- * weight centroids by population
- * map projections
  * semidiscrete case
  * report
- * plot centers
- * include split areas
  * check if rounded and split solution has lower cost
  * 

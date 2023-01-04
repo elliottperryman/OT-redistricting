@@ -6,6 +6,7 @@ Algorithms for solving redistricting by optimal transport
 import numpy as np
 import numba as nb # compile sinkhorn for speed
 from shapely.geometry import Point
+from geopandas import GeoSeries
 
 from State import State
 from District import District
@@ -72,10 +73,10 @@ def _solve_discrete(df, K, centers):
     returns:
         * the sinkhorn results, the agglomerated result, the approximated cost 
     """
-    centroids = df['geometry'].centroid
- 
+    centroids = df.to_crs(crs=3857).centroid.to_crs(4269)
+
     # calculate cost matrix
-    C = np.array([centroids.distance(p) for p in centers]).T
+    C = np.array([centroids.to_crs(3857).distance(p) for p in centers]).T
     C /= np.max(C)
     # fill in densities
     a, b = df['pop'].values, np.ones(K)/K
@@ -88,15 +89,26 @@ def _solve_discrete(df, K, centers):
     dist = res.argmax(1)
     dist[split] = -1
     df2['district'] = dist
+
+    centroids = [df['geometry'][df2['district']==i].to_crs(3857).centroid.to_crs(4269) for i in range(K)]
+    print(df2)
+    pops = [df['pop'][df2['district']==i].values for i in range(K)]
+    pops = [p/np.sum(p) for p in pops]
+    print('centroids')
+    print(centroids)
+    x,y = [_.x.values for _ in centroids], [_.y.values for _ in centroids]
+    print('x,y')
+    print(x,y)
+    for a,b,p in zip(x,y,pops): print(np.mean(a),np.mean(b), np.mean(a*p/np.sum(p)), np.mean(b*p/np.sum(p)))
+    centers = GeoSeries([Point([np.mean(x[i]*pops[i]), np.mean(y[i]*pops[i])]) for i in range(K)])
+    print('centers')
+    for c in centers: print(c)
+    centers.set_crs(4269)
+    print('centers')
+    for c in centers: print(c)
+    raise Exception
     df2 = df2.dissolve(by='district', aggfunc='sum')
 
-    centers = [df[dist==i].centroid for i in range(K)]
-    # centers = []
-    # for i in range(K):
-    #     x, y = centroids[dist==i].x, centroids[dist==i].y
-    #     pop = df['pop'].values[dist==i]
-    #     mean_x, mean_y = np.mean(x*pop)/np.sum(pop), np.mean(y*pop)/np.sum(pop)
-    #     centers.append(Point([mean_x, mean_y]))
     return res, df2, cost(res, C), centers
 
 def solve_discrete(state : State, lvl='tract', centers = None):
@@ -107,8 +119,10 @@ def solve_discrete(state : State, lvl='tract', centers = None):
     elif lvl=='county':
         df = state.county_df
     if centers is None:
-        centers = [rand_guess(state.state_geometry) for i in range(state.num_districts)]
-
+        centers = GeoSeries([rand_guess(state.state_geometry) for i in range(state.num_districts)])
+        centers.set_crs(4269)
+        print('default centers')
+        for c in centers: print(c)
     res, df2, cost_val, centers = _solve_discrete(df, state.num_districts, centers)
 
     district = District(state, res, df2, cost_val, centers)
