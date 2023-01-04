@@ -90,23 +90,12 @@ def _solve_discrete(df, K, centers):
     dist[split] = -1
     df2['district'] = dist
 
-    centroids = [df['geometry'][df2['district']==i].to_crs(3857).centroid.to_crs(4269) for i in range(K)]
-    print(df2)
-    pops = [df['pop'][df2['district']==i].values for i in range(K)]
+    centroids = [df['geometry'][res.argmax(1)==i].to_crs(3857).centroid.to_crs(4269) for i in range(K)]
+    pops = [df['pop'][res.argmax(1)==i].values for i in range(K)]
     pops = [p/np.sum(p) for p in pops]
-    print('centroids')
-    print(centroids)
     x,y = [_.x.values for _ in centroids], [_.y.values for _ in centroids]
-    print('x,y')
-    print(x,y)
-    for a,b,p in zip(x,y,pops): print(np.mean(a),np.mean(b), np.mean(a*p/np.sum(p)), np.mean(b*p/np.sum(p)))
-    centers = GeoSeries([Point([np.mean(x[i]*pops[i]), np.mean(y[i]*pops[i])]) for i in range(K)])
-    print('centers')
-    for c in centers: print(c)
+    centers = GeoSeries([Point([np.sum(x[i]*pops[i]), np.sum(y[i]*pops[i])]) for i in range(K)])
     centers.set_crs(4269)
-    print('centers')
-    for c in centers: print(c)
-    raise Exception
     df2 = df2.dissolve(by='district', aggfunc='sum')
 
     return res, df2, cost(res, C), centers
@@ -121,9 +110,11 @@ def solve_discrete(state : State, lvl='tract', centers = None):
     if centers is None:
         centers = GeoSeries([rand_guess(state.state_geometry) for i in range(state.num_districts)])
         centers.set_crs(4269)
-        print('default centers')
-        for c in centers: print(c)
     res, df2, cost_val, centers = _solve_discrete(df, state.num_districts, centers)
+    for i in range(len(centers)):
+        if centers[i].is_empty:
+            centers[i] = rand_guess(state.state_geometry)
+    centers.set_crs(4269)
 
     district = District(state, res, df2, cost_val, centers)
     return district

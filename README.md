@@ -13,7 +13,9 @@ You can learn more about it [here](https://www.census.gov/geographies/mapping-fi
  * I think we should move to downloaded data. It removes wifi problems and all the associated problems
 
 ## To Do list:
+ * right now all districts are being called as split. this is wrong.
  * semidiscrete case
  * report
  * check if rounded and split solution has lower cost
- * 
+ * the random guesses should be drawn from a poisson point process with intensity equal to the population
+ * the population weighting should just sum
