@@ -15,4 +15,4 @@ class District():
         plt.ylabel('Longitude')
         plt.xlabel('Latitude')
         plt.title(self.state.pretty_name)
-
+        plt.scatter([[_.x for _ in self.centers], [_.y for _ in self.centers]])
