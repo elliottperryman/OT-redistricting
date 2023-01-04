@@ -6,25 +6,18 @@ This is an implementation of redistricting using Optimal Transport.
 
 source start.sh or install the environment manually with requirements.txt.
 
-## where is this data stored?
+## What data is used? / What happened to data?
 
-The data currently used comes from TIGER2020 a project of the US Census Bureau.
-You can learn more about it [here][https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2020.html#list-tab-JMJDQEOVO9RD9R31BU]
+ * The data currently used comes from TIGER2020 a project of the US Census Bureau.
+You can learn more about it [here](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.2020.html#list-tab-JMJDQEOVO9RD9R31BU) and download [here](https://www2.census.gov/geo/tiger/TIGER2020/TABBLOCK20/)
+ * I think we should move to downloaded data. It removes wifi problems and all the associated problems
 
-## How to plot data:
-
-    with a GeoDataFrame:
-     This one works !!!
-     `df.plot(column=df.index.values, categorical=True, legend=True)`
-        * df.plot(column='district', categorical=True, legend=True)
-        * df.plot(column=districts, categorical=True, legend=True)
-
-## Known Bugs:
-
- * I forgot to make the centroids weighted by population
- * The earth is not flat
-    * figure out how to convert to flat earth
-    * figure out the right projections (seems hard as projection depends on location)
- * I think I should start the centroids by sampling from population(X)
- * the centers should be plotted as well
- * the iterative algorithm doesn't work because of the -1 districts
+## To Do list:
+ * weight centroids by population
+ * map projections
+ * semidiscrete case
+ * report
+ * plot centers
+ * include split areas
+ * check if rounded and split solution has lower cost
+ * 
