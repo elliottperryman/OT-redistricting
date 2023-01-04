@@ -39,7 +39,7 @@ def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
 
 def _sinkhorn(C, a, b, u, v, MAX_ITER):
     ϵ = 1e-3
-    for i in range(10):
+    for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
             print('ϵ of '+str(ϵ)+' too small. Doubling..')
@@ -90,37 +90,16 @@ def _solve_discrete(df, K, centers):
     df2['district'] = dist
     df2 = df2.dissolve(by='district', aggfunc='sum')
 
-    centers = []
-    for i in range(K):
-        x, y = centroids[dist==i].x, centroids[dist==i].y
-        pop = df['pop'].values[dist==i]
-        mean_x, mean_y = np.mean(x*pop)/np.sum(pop), np.mean(y*pop)/np.sum(pop)
-        centers.append(Point([mean_x, mean_y]))
+    centers = [df[dist==i].centroid for i in range(K)]
+    # centers = []
+    # for i in range(K):
+    #     x, y = centroids[dist==i].x, centroids[dist==i].y
+    #     pop = df['pop'].values[dist==i]
+    #     mean_x, mean_y = np.mean(x*pop)/np.sum(pop), np.mean(y*pop)/np.sum(pop)
+    #     centers.append(Point([mean_x, mean_y]))
     return res, df2, cost(res, C), centers
 
-# def lloyd_alg(state_num,K,lvl='tract'):
-#     block_df, tract_df, county_df, state = load_pop_df(state_num)
-#     if lvl=='block':
-#         df = block_df
-#     elif lvl=='tract':
-#         df = tract_df
-#     elif lvl=='county':
-#         df = county_df
-#     sinkhorn_res, df_res, cost_res, centers = [], [], [], []
-#     for i in range(10):
-#         if i == 0:
-#             a, b, c, d = solve_discrete(df, state, K)
-#         else:
-#             a, b, c, d = solve_discrete(df, state, K, df_res[-1]['geometry'].centroid.values)
-#         if np.isnan(a).any():
-#             raise RuntimeError('nan values in sinkhorn method. results not trustworthy')
-#         sinkhorn_res.append(a)
-#         df_res.append(b)
-#         cost_res.append(c)
-#         centers.append(d)
-#     return sinkhorn_res, df_res, cost_res, centers
-
-def solve_discrete(state : State, K, lvl='tract', centers = None):
+def solve_discrete(state : State, lvl='tract', centers = None):
     if lvl=='block':
         df = state.block_df
     elif lvl=='tract':
@@ -128,9 +107,9 @@ def solve_discrete(state : State, K, lvl='tract', centers = None):
     elif lvl=='county':
         df = state.county_df
     if centers is None:
-        centers = [rand_guess(state.state_geometry) for i in range(K)]
+        centers = [rand_guess(state.state_geometry) for i in range(state.num_districts)]
 
-    res, df2, cost_val, centers = _solve_discrete(df, K, centers)
+    res, df2, cost_val, centers = _solve_discrete(df, state.num_districts, centers)
 
-    district = District(state, res, df2, K, cost_val, centers)
+    district = District(state, res, df2, cost_val, centers)
     return district
