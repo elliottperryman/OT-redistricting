@@ -4,7 +4,7 @@ Algorithms for solving redistricting by optimal transport
 
 ## Standard imports
 import numpy as np
-# import numba as nb # compile sinkhorn for speed
+import numba as nb # compile sinkhorn for speed
 # import matplotlib.pyplot as plt
 # geometry tools
 # import pandas as pd
@@ -28,7 +28,7 @@ from District import District
 #         * dataframe of ['tract', 'pop', 'geometry']
 #         * dataframe of ['county', 'pop', 'geometry']
 #         * geometry of state (0 population areas excluded)
-    
+
 #     """
 
 #     # try to download the shapefile associated to the given state 
@@ -94,7 +94,7 @@ def rand_guess(state):
 """
 def u_v_gen(C):
     return np.random.normal(size=C.shape[0]), np.random.normal(size=C.shape[1])
-
+@nb.njit
 def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     K = np.exp(-C/ϵ)
     for i in range(MAX_ITER):
