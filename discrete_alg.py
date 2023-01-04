@@ -5,80 +5,11 @@ Algorithms for solving redistricting by optimal transport
 ## Standard imports
 import numpy as np
 import numba as nb # compile sinkhorn for speed
-# import matplotlib.pyplot as plt
-# geometry tools
-# import pandas as pd
-# import fiona
-import shapely
-# import geopandas
+from shapely.geometry import Point
+
 from State import State
 from District import District
-
-# # download US data and possible errors
-# from download_US_States_Shapefile import download_shapefile_bynumber, ShapeFileAlreadyDownloadedError, StateNumberDoesNotExistError
-
-# def load_pop_df(state_num):
-#     """
-#     Loads the data for a given state identified by the (integer) argument state_num. 
-#     For a list of corresponding state number, see states_dict in download_US_States_Shapefile.
-#     Data is processed thanks to Geopandas as a GeoDataFrame. See website.
-
-#     ~Output~: three "zoom levels" are outputed. They go from smallest to greatest.
-#         * dataframe of ['block', 'pop', 'geometry']
-#         * dataframe of ['tract', 'pop', 'geometry']
-#         * dataframe of ['county', 'pop', 'geometry']
-#         * geometry of state (0 population areas excluded)
-
-#     """
-
-#     # try to download the shapefile associated to the given state 
-#     # Catch an error if the state number does not exist
-#     try:
-#         download_shapefile_bynumber(state_num)
-#     except ShapeFileAlreadyDownloadedError:
-#         pass
-#     except StateNumberDoesNotExistError as e:
-#         print(e)
-#         raise StateNumberDoesNotExistError()
-
-#     df = geopandas.read_file(f'data/{state_num:02d}/tl_2020_{state_num:02d}_tabblock20.shp')
-
-#     # only worry about regions with non-zero population
-#     df = df[df['POP20']>0]
-#     # count total people in region 
-#     total_people = df['POP20'].sum()
-#     # create template to grab features from
-#     df = geopandas.GeoDataFrame({
-#         'state': df['STATEFP20'].astype(int), 
-#         'county': df['COUNTYFP20'].astype(int),
-#         'tract': df['TRACTCE20'].astype(int), 
-#         'block': df['BLOCKCE20'].astype(int),
-#         'pop': df['POP20'].astype(float)/total_people, 
-#         'geometry': df['geometry'], 
-#         })
-#     # create hierarchy of structures
-#     agg = {
-#             'state':'first', 'county':'first', 
-#             'tract':'first', 'block':'first', 'pop':'sum'
-#     }
-#     block_df = df[['block', 'pop', 'geometry']]
-#     tract_df = df.dissolve(by='tract', aggfunc=agg)
-#     county_df = tract_df.dissolve(by='county', aggfunc=agg)
-#     state_df = county_df.dissolve(by='state', aggfunc=agg)
-
-#     tract_df = tract_df[['pop', 'geometry']]
-#     county_df = county_df[['pop', 'geometry']]
-#     state = state_df['geometry'].values[0]
-#     return block_df, tract_df, county_df, state
-
-def rand_guess(state):
-    """
-    rand_guess puts a point randomly in the box surrounding the state
-    """
-    minx, miny, maxx, maxy = state.bounds
-    LB, UB = np.array([minx, miny]), np.array([maxx, maxy])
-    p = shapely.geometry.Point(*(np.random.random()*(UB-LB)+LB))
-    return p
+from misc import rand_guess
 
 """
     The next section is a little confusing. sinkhorn runs the
@@ -159,6 +90,12 @@ def _solve_discrete(df, K, centers):
     df2['district'] = dist
     df2 = df2.dissolve(by='district', aggfunc='sum')
 
+    centers = []
+    for i in range(K):
+        x, y = centroids[dist==i].x, centroids[dist==i].y
+        pop = df['pop'].values[dist==i]
+        mean_x, mean_y = np.mean(x*pop)/np.sum(pop), np.mean(y*pop)/np.sum(pop)
+        centers.append(Point([mean_x, mean_y]))
     return res, df2, cost(res, C), centers
 
 # def lloyd_alg(state_num,K,lvl='tract'):
