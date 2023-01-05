@@ -32,14 +32,14 @@ def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     for i in range(MAX_ITER):
         u_ = a / (K @ v)
         v_ = b / (u_ @ K)
-        if np.linalg.norm(u_-u) + np.linalg.norm(v_-v) < 1e-14 and i > 50:
+        if np.linalg.norm(u_-u) + np.linalg.norm(v_-v) < 1e-14 and i > 100:
             break
         u = u_
         v = v_
     return np.diag(u) @ K @ np.diag(v)
 
 def _sinkhorn(C, a, b, u, v, MAX_ITER):
-    ϵ = 1e-3
+    ϵ = 1e-5
     for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
@@ -63,7 +63,7 @@ def compile():
 compile()
 
 
-def _solve_discrete(df, K, centers):
+def solve_discrete(state: State, centers=None) -> District:
     """
     solve the discrete optimal transport problem
         * df is the dataframe with cols 'pop' and 'geometry'
@@ -73,46 +73,27 @@ def _solve_discrete(df, K, centers):
     returns:
         * the sinkhorn results, the agglomerated result, the approximated cost 
     """
-    centroids = df.centroid # .to_crs(crs=3857).centroid.to_crs(4269)
 
+    if centers is None:
+        centers = sample_rand(state.df, state.num_districts)
+    K = state.num_districts
+    centroids = state.df.centroid # .to_crs(crs=3857).centroid.to_crs(4269)
     # calculate cost matrix
     # C = np.array([centroids.to_crs(3857).distance(p) for p in centers]).T
     C = np.array([centroids.distance(p) for p in centers]).T
     C /= np.max(C)
     # fill in densities
-    a, b = df['pop'].values, np.ones(K)/K
+    a, b = state.df['pop'].values, np.ones(K)/K
     # solve sinkhorn
     res = sinkhorn(C, a, b)
-    # agglomerate result (approximating each as binary allocation!) 
-    df2 = df.copy()
-    # if more than 1% goes to another district, put it in the "split" pile
-    # split = (res.T/res.sum(1)).T.max(1)<0.99
-    dist = res.argmax(1)
-    # dist[split] = -1
-    df2['district'] = dist
-
+    # calculate centroids weighted by population or not!
     x, y = centroids.x.values, centroids.y.values
-    normFactor = (df['pop'].values.reshape(-1,1)*res).sum(0)
-    center_x = np.sum((x * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
-    center_y = np.sum((y * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
+    # normFactor = (df['pop'].values.reshape(-1,1)*res).sum(0)
+    # center_x = np.sum((x * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
+    # center_y = np.sum((y * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
+    center_x = np.array([np.mean(x[res.argmax(1)==i]) for i in range(K)])
+    center_y = np.array([np.mean(y[res.argmax(1)==i]) for i in range(K)])
     centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
     # centers.set_crs(4269)
-    
-    return res, df2, centers
-
-def solve_discrete(state : State, lvl='tract', centers = None):
-    if lvl=='block':
-        df = state.block_df
-    elif lvl=='tract':
-        df = state.tract_df
-    elif lvl=='county':
-        df = state.county_df
-    if centers is None:
-        centers = sample_rand(df, state.num_districts)
-        # centers = GeoSeries([rand_guess(state.state_geometry) for i in range(state.num_districts)])
-        # centers.set_crs(4269)
-    res, df2, centers = _solve_discrete(df, state.num_districts, centers)
-
-
-    district = District(state, res, df2, centers)
+    district = District(state, res, centers)
     return district
