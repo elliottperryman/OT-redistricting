@@ -32,14 +32,14 @@ def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     for i in range(MAX_ITER):
         u_ = a / (K @ v)
         v_ = b / (u_ @ K)
-        if np.linalg.norm(u_-u) + np.linalg.norm(v_-v) < 1e-14 and i > 50:
+        if np.linalg.norm(u_-u) + np.linalg.norm(v_-v) < 1e-14 and i > 100:
             break
         u = u_
         v = v_
     return np.diag(u) @ K @ np.diag(v)
 
 def _sinkhorn(C, a, b, u, v, MAX_ITER):
-    ϵ = 1e-3
+    ϵ = 1e-5
     for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
