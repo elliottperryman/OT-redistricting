@@ -13,6 +13,7 @@ You can learn more about it [here](https://www.census.gov/geographies/mapping-fi
  * I think we should move to downloaded data. It removes wifi problems and all the associated problems
 
 ## To Do list:
+ * projections. I think that .to_crs(crs=3857).centroid.to_crs(4269) should workarino
  * right now all districts are being called as split. this is wrong.
  * semidiscrete case
  * report
