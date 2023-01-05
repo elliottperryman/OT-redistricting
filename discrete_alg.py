@@ -10,7 +10,7 @@ from geopandas import GeoSeries
 
 from State import State
 from District import District
-from misc import rand_guess
+from misc import rand_guess, sample_rand
 
 """
     The next section is a little confusing. sinkhorn runs the
@@ -73,10 +73,11 @@ def _solve_discrete(df, K, centers):
     returns:
         * the sinkhorn results, the agglomerated result, the approximated cost 
     """
-    centroids = df.to_crs(crs=3857).centroid.to_crs(4269)
+    centroids = df.centroid # .to_crs(crs=3857).centroid.to_crs(4269)
 
     # calculate cost matrix
-    C = np.array([centroids.to_crs(3857).distance(p) for p in centers]).T
+    # C = np.array([centroids.to_crs(3857).distance(p) for p in centers]).T
+    C = np.array([centroids.distance(p) for p in centers]).T
     C /= np.max(C)
     # fill in densities
     a, b = df['pop'].values, np.ones(K)/K
@@ -85,20 +86,19 @@ def _solve_discrete(df, K, centers):
     # agglomerate result (approximating each as binary allocation!) 
     df2 = df.copy()
     # if more than 1% goes to another district, put it in the "split" pile
-    split = (res.T/res.sum(1)).T.max(1)<0.99
+    # split = (res.T/res.sum(1)).T.max(1)<0.99
     dist = res.argmax(1)
-    dist[split] = -1
+    # dist[split] = -1
     df2['district'] = dist
 
-    centroids = [df['geometry'][res.argmax(1)==i].to_crs(3857).centroid.to_crs(4269) for i in range(K)]
-    pops = [df['pop'][res.argmax(1)==i].values for i in range(K)]
-    pops = [p/np.sum(p) for p in pops]
-    x,y = [_.x.values for _ in centroids], [_.y.values for _ in centroids]
-    centers = GeoSeries([Point([np.sum(x[i]*pops[i]), np.sum(y[i]*pops[i])]) for i in range(K)])
-    centers.set_crs(4269)
-    df2 = df2.dissolve(by='district', aggfunc='sum')
-
-    return res, df2, cost(res, C), centers
+    x, y = centroids.x.values, centroids.y.values
+    normFactor = (df['pop'].values.reshape(-1,1)*res).sum(0)
+    center_x = np.sum((x * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
+    center_y = np.sum((y * df['pop'].values).reshape(-1,1) * res / normFactor, 0)
+    centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
+    # centers.set_crs(4269)
+    
+    return res, df2, centers
 
 def solve_discrete(state : State, lvl='tract', centers = None):
     if lvl=='block':
@@ -108,13 +108,11 @@ def solve_discrete(state : State, lvl='tract', centers = None):
     elif lvl=='county':
         df = state.county_df
     if centers is None:
-        centers = GeoSeries([rand_guess(state.state_geometry) for i in range(state.num_districts)])
-        centers.set_crs(4269)
-    res, df2, cost_val, centers = _solve_discrete(df, state.num_districts, centers)
-    for i in range(len(centers)):
-        if centers[i].is_empty:
-            centers[i] = rand_guess(state.state_geometry)
-    centers.set_crs(4269)
+        centers = sample_rand(df, state.num_districts)
+        # centers = GeoSeries([rand_guess(state.state_geometry) for i in range(state.num_districts)])
+        # centers.set_crs(4269)
+    res, df2, centers = _solve_discrete(df, state.num_districts, centers)
 
-    district = District(state, res, df2, cost_val, centers)
+
+    district = District(state, res, df2, centers)
     return district
