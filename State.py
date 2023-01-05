@@ -11,7 +11,7 @@ class State():
         self.discrete = discrete
         self.num_districts = state_district_count[self.state_name]
 
-        df = df = geopandas.read_file(f'data/tl_2020_{state_num:02d}_tabblock20/tl_2020_{state_num:02d}_tabblock20.shp')
+        df = geopandas.read_file(f'data/tl_2020_{state_num:02d}_tabblock20.shp')
 
         # only worry about regions with non-zero population
         df = df[df['POP20']>0]
