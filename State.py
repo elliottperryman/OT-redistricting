@@ -32,7 +32,7 @@ class State():
                 'tract':'first', 'block':'first', 'pop':'sum'
         }
         self.df = df.dissolve(by=lvl, aggfunc=agg)
-        self.state_geometry = None
+        self._state_geometry = None
         self.df = df[['pop', 'geometry']]
 
         # self.block_df = df[['block', 'pop', 'geometry']]
@@ -45,9 +45,9 @@ class State():
         # self.state_geometry = state_df['geometry'].values[0]
     @property
     def state_geometry(self):
-        if self.state_geometry is None:
-            self.state_geometry = self.df.dissolve()['geometry'].values[0]
-        return self.state_geometry
+        if self._state_geometry is None:
+            self._state_geometry = self.df.dissolve()['geometry'].values[0]
+        return self._state_geometry
 
     def plot(self, show=True):
         self.df.plot(column=self.df['pop']*self.total_people, cmap='Reds')
