@@ -4,7 +4,7 @@ from state_district_count import state_district_count
 from state_name_by_number import state_name_by_number
 
 class State():
-    def __init__(self, state_num, discrete=True):
+    def __init__(self, state_num, lvl='tract', discrete=True):
         self.state_num = state_num
         self.state_name = state_name_by_number[state_num]
         self.pretty_name = self.state_name.replace('_',' ').title()
@@ -31,17 +31,26 @@ class State():
                 'state':'first', 'county':'first', 
                 'tract':'first', 'block':'first', 'pop':'sum'
         }
-        self.block_df = df[['block', 'pop', 'geometry']]
-        tract_df = df.dissolve(by='tract', aggfunc=agg)
-        county_df = tract_df.dissolve(by='county', aggfunc=agg)
-        state_df = county_df.dissolve(by='state', aggfunc=agg)
+        self.df = df.dissolve(by=lvl, aggfunc=agg)
+        self.state_geometry = None
+        self.df = df[['pop', 'geometry']]
 
-        self.tract_df = tract_df[['pop', 'geometry']]
-        self.county_df = county_df[['pop', 'geometry']]
-        self.state_geometry = state_df['geometry'].values[0]
-    
+        # self.block_df = df[['block', 'pop', 'geometry']]
+        # tract_df = df.dissolve(by='tract', aggfunc=agg)
+        # county_df = tract_df.dissolve(by='county', aggfunc=agg)
+        # state_df = county_df.dissolve(by='state', aggfunc=agg)
+
+        # self.tract_df = tract_df[['pop', 'geometry']]
+        # self.county_df = county_df[['pop', 'geometry']]
+        # self.state_geometry = state_df['geometry'].values[0]
+    @property
+    def state_geometry(self):
+        if self.state_geometry is None:
+            self.state_geometry = self.df.dissolve()['geometry'].values[0]
+        return self.state_geometry
+
     def plot(self, show=True):
-        self.block_df.plot(column=self.block_df['pop']*self.total_people, cmap='Reds')
+        self.df.plot(column=self.df['pop']*self.total_people, cmap='Reds')
         plt.ylabel('Longitude')
         plt.xlabel('Latitude')
         plt.title(self.pretty_name)
