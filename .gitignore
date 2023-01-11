@@ -1,4 +1,10 @@
 anaconda3
-data
+**.shp
+**.shx
+**.cpg
+**.dbf
+**.prj
+**.iso.xml
+**.zip
 Sem
 __pycache__

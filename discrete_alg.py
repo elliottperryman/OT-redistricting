@@ -39,7 +39,7 @@ def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     return np.diag(u) @ K @ np.diag(v)
 
 def _sinkhorn(C, a, b, u, v, MAX_ITER):
-    ϵ = 1e-5
+    ϵ = 1e-4
     for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
