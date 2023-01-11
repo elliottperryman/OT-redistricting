@@ -35,6 +35,7 @@ class State():
             self.df = df.dissolve(by=lvl, aggfunc=agg)
             self._state_geometry = None
             self.df = df[['pop', 'geometry']]
+            self.df['centroid'] = self.df.centroid
         else:
             self.df = geopandas.GeoDataFrame({
                 'block': df['BLOCKCE20'].astype(int),
@@ -50,7 +51,7 @@ class State():
         return (self.df['pop'] * self.df['geometry'].intersection(region).area / self.df['area']).sum()
     
     def __str__(self):
-        return '%s\t\nPopulation: %d\t\n# districts:%d\n' % (self.pretty_name, self.total_people, self.num_districts)
+        return '%s\t\nPopulation: %d\t\n# districts: %d\n' % (self.pretty_name, self.total_people, self.num_districts)
 
     @property
     def state_geometry(self):
