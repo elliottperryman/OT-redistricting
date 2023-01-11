@@ -35,6 +35,7 @@ class State():
             self.df = df.dissolve(by=lvl, aggfunc=agg)
             self._state_geometry = None
             self.df = df[['pop', 'geometry']]
+            self.df['centroid'] = self.df.centroid
         else:
             self.df = geopandas.GeoDataFrame({
                 'block': df['BLOCKCE20'].astype(int),
