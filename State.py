@@ -17,32 +17,41 @@ class State():
         df = df[df['POP20']>0]
         # count total people in region 
         self.total_people = df['POP20'].sum()
-        # create template to grab features from
-        df = geopandas.GeoDataFrame({
-            'state': df['STATEFP20'].astype(int), 
-            'county': df['COUNTYFP20'].astype(int),
-            'tract': df['TRACTCE20'].astype(int), 
-            'block': df['BLOCKCE20'].astype(int),
-            'pop': df['POP20'].astype(float)/self.total_people, 
-            'geometry': df['geometry'], 
-            })
-        # create hierarchy of structures
-        agg = {
-                'state':'first', 'county':'first', 
-                'tract':'first', 'block':'first', 'pop':'sum'
-        }
-        self.df = df.dissolve(by=lvl, aggfunc=agg)
-        self._state_geometry = None
-        self.df = df[['pop', 'geometry']]
+        if self.discrete:
+            # create template to grab features from
+            df = geopandas.GeoDataFrame({
+                'state': df['STATEFP20'].astype(int), 
+                'county': df['COUNTYFP20'].astype(int),
+                'tract': df['TRACTCE20'].astype(int), 
+                'block': df['BLOCKCE20'].astype(int),
+                'pop': df['POP20'].astype(float)/self.total_people, 
+                'geometry': df['geometry'], 
+                })
+            # create hierarchy of structures
+            agg = {
+                    'state':'first', 'county':'first', 
+                    'tract':'first', 'block':'first', 'pop':'sum'
+            }
+            self.df = df.dissolve(by=lvl, aggfunc=agg)
+            self._state_geometry = None
+            self.df = df[['pop', 'geometry']]
+        else:
+            self.df = geopandas.GeoDataFrame({
+                'block': df['BLOCKCE20'].astype(int),
+                'pop': df['POP20'].astype(float)/self.total_people, 
+                'area': df['geometry'].area,
+                'geometry': df['geometry'], 
+                })
+    def population_covered(self, region):
+        '''
+            Figure out what % of the total population is inside region
+             * assumes a piecewise constant population density
+        '''
+        return (self.df['pop'] * self.df['geometry'].intersection(region).area / self.df['area']).sum()
+    
+    def __str__(self):
+        return '%s\t\nPopulation: %d\t\n# districts:%d\n' % (self.pretty_name, self.total_people, self.num_districts)
 
-        # self.block_df = df[['block', 'pop', 'geometry']]
-        # tract_df = df.dissolve(by='tract', aggfunc=agg)
-        # county_df = tract_df.dissolve(by='county', aggfunc=agg)
-        # state_df = county_df.dissolve(by='state', aggfunc=agg)
-
-        # self.tract_df = tract_df[['pop', 'geometry']]
-        # self.county_df = county_df[['pop', 'geometry']]
-        # self.state_geometry = state_df['geometry'].values[0]
     @property
     def state_geometry(self):
         if self._state_geometry is None:
