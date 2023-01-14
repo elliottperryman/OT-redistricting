@@ -13,23 +13,29 @@ class District():
         self.ϵ = ϵ
 
         # calculate centroids weighted by population (or not!)
-        x, y = self.state.df['centroid'].x.values, self.state.df['centroid'].y.values
+        x, y = self.state.centroid.x.values, self.state.centroid.y.values
         normFactor = (self.state.df['pop'].values.reshape(-1,1)*res).sum(0)
         center_x = np.sum((x * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
         center_y = np.sum((y * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
         self.new_centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
 
+        self._score = None
     def score(self):
-        return np.sum(np.array([self.state.df.distance(p) for p in self.old_centers]).T * self.res)
-    
-    def plot(self, show=True, save_filename=None):
+        if self._score is None:
+            self._score = np.sum(np.array([self.state.centroid.distance(p) for p in self.old_centers]).T * self.res)
+        return self._score
+
+    def dissolve(self):
         if self.dissolved is None:
-            self.dissolved = self.state.df.copy()
+            self.dissolved = self.state.df[['geometry']]
             self.dissolved['district'] = self.res.argmax(1)
-            self.dissolved = self.dissolved.dissolve(by='district', aggfunc='sum')
+            self.dissolved = self.dissolved.dissolve(by='district')
+
+    def plot(self, show=True, save_filename=None):
+        self.dissolve()
         self.dissolved.plot(
-            column=self.dissolved.index.values, categorical=True, legend=True,
-            labels=['District %d' % i for i in range(1,self.state.num_districts+1)]
+            column=self.dissolved.index.values, categorical=True, legend=True#,
+            #legend_kwds={'labels':['District %d' % i for i in range(1,self.state.num_districts+1)]}
         )
         plt.ylabel('Longitude')
         plt.xlabel('Latitude')
@@ -40,3 +46,5 @@ class District():
         elif save_filename is not None:
             plt.savefig(save_filename, transparent=True, bbox_inches='tight')
 
+    def __str__(self):
+        return 'State: %s\n\tScore: %f\n\tϵ = %f' % (self.state.pretty_name, self.score(), self.ϵ)
