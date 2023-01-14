@@ -8,3 +8,4 @@ anaconda3
 **.zip
 Sem
 __pycache__
+.DS_Store

@@ -27,6 +27,7 @@ from misc import rand_guess, sample_rand
 def u_v_gen(C):
     return np.random.normal(size=C.shape[0]), np.random.normal(size=C.shape[1])
 
+@nb.njit
 def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     K = np.exp(-C/ϵ)
     for i in range(MAX_ITER):
@@ -43,11 +44,11 @@ def _sinkhorn(C, a, b, u, v, MAX_ITER):
     for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
-            print('ϵ of '+str(ϵ)+' too small. Doubling..')
+            # print('ϵ of '+str(ϵ)+' too small. Doubling..')
             ϵ *= 2
         else:
             print('ϵ of '+str(ϵ)+' worked')
-            return res
+            return res, ϵ
     else:
         raise RuntimeError('Still returning nan from sinkhorn')
 
@@ -59,7 +60,7 @@ def cost(C,res):
 def compile():
     C = np.random.random((4,2))
     a, b = np.ones(4)/2, np.ones(2)
-    cost(C,sinkhorn(C, a, b))
+    cost(C,sinkhorn(C, a, b)[0])
 compile()
 
 
@@ -75,25 +76,20 @@ def solve_discrete(state: State, centers=None) -> District:
     """
 
     if centers is None:
-        centers = sample_rand(state.df, state.num_districts)
+        centers = sample_rand(state)
     K = state.num_districts
-    centroids = state.df['centroid'] # .to_crs(crs=3857).centroid.to_crs(4269)
+    centroids = state.centroid
     # calculate cost matrix
-    # C = np.array([centroids.to_crs(3857).distance(p) for p in centers]).T
     C = np.array([centroids.distance(p) for p in centers]).T
     C /= np.max(C)
     # fill in densities
     a, b = state.df['pop'].values, np.ones(K)/K
+    # scale = np.max(a)
+    # a /= scale
+    # b /= scale
     # solve sinkhorn
-    res = sinkhorn(C, a, b)
-    # calculate centroids weighted by population or not!
-    x, y = centroids.x.values, centroids.y.values
-    normFactor = (state.df['pop'].values.reshape(-1,1)*res).sum(0)
-    center_x = np.sum((x * state.df['pop'].values).reshape(-1,1) * res / normFactor, 0)
-    center_y = np.sum((y * state.df['pop'].values).reshape(-1,1) * res / normFactor, 0)
-    # center_x = np.array([np.mean(x[res.argmax(1)==i]) for i in range(K)])
-    # center_y = np.array([np.mean(y[res.argmax(1)==i]) for i in range(K)])
-    centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
+    res,ϵ = sinkhorn(C, a, b)
+
     # centers.set_crs(4269)
-    district = District(state, res, centers)
+    district = District(state=state, res=res, centers=centers, ϵ=ϵ)
     return district
