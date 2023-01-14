@@ -43,11 +43,11 @@ def _sinkhorn(C, a, b, u, v, MAX_ITER):
     for i in range(30):
         res = base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER=MAX_ITER)
         if np.isnan(res).any():
-            print('ϵ of '+str(ϵ)+' too small. Doubling..')
+            # print('ϵ of '+str(ϵ)+' too small. Doubling..')
             ϵ *= 2
         else:
-            print('ϵ of '+str(ϵ)+' worked')
-            return res
+            # print('ϵ of '+str(ϵ)+' worked')
+            return res, ϵ
     else:
         raise RuntimeError('Still returning nan from sinkhorn')
 
@@ -85,15 +85,8 @@ def solve_discrete(state: State, centers=None) -> District:
     # fill in densities
     a, b = state.df['pop'].values, np.ones(K)/K
     # solve sinkhorn
-    res = sinkhorn(C, a, b)
-    # calculate centroids weighted by population or not!
-    x, y = centroids.x.values, centroids.y.values
-    normFactor = (state.df['pop'].values.reshape(-1,1)*res).sum(0)
-    center_x = np.sum((x * state.df['pop'].values).reshape(-1,1) * res / normFactor, 0)
-    center_y = np.sum((y * state.df['pop'].values).reshape(-1,1) * res / normFactor, 0)
-    # center_x = np.array([np.mean(x[res.argmax(1)==i]) for i in range(K)])
-    # center_y = np.array([np.mean(y[res.argmax(1)==i]) for i in range(K)])
-    centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
+    res,ϵ = sinkhorn(C, a, b)
+
     # centers.set_crs(4269)
-    district = District(state, res, centers)
+    district = District(state=state, res=res, centers=centers, ϵ=ϵ)
     return district
