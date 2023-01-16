@@ -5,7 +5,7 @@ from geopandas import GeoSeries
 from shapely.geometry import Point
 
 class District():
-    def __init__(self, state: State, res, centers, ϵ:float):
+    def __init__(self, state: State, res, centers, ϵ:float, op3=False):
         self.state = state
         self.res = res
         self.dissolved = None
@@ -14,9 +14,13 @@ class District():
 
         # calculate centroids weighted by population (or not!)
         x, y = self.state.centroid.x.values, self.state.centroid.y.values
-        normFactor = (self.state.df['pop'].values.reshape(-1,1)*res).sum(0)
-        center_x = np.sum((x * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
-        center_y = np.sum((y * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
+        if not op3:
+            center_x = np.array([np.mean(x[res.argmax(1)==i]) for i in range(self.state.num_districts)])
+            center_y = np.array([np.mean(y[res.argmax(1)==i]) for i in range(self.state.num_districts)])
+        else:
+            normFactor = (self.state.df['pop'].values.reshape(-1,1)*res).sum(0)
+            center_x = np.sum((x * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
+            center_y = np.sum((y * self.state.df['pop'].values).reshape(-1,1) * self.res / normFactor, 0)
         self.new_centers = GeoSeries([Point([a,b]) for a,b in zip(center_x,center_y)])
 
         self._score = None

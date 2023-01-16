@@ -64,7 +64,7 @@ def compile():
 compile()
 
 
-def solve_discrete(state: State, centers=None) -> District:
+def solve_discrete(state: State, centers=None, op1=False, op2=False, op3=False) -> District:
     """
     solve the discrete optimal transport problem
         * df is the dataframe with cols 'pop' and 'geometry'
@@ -75,8 +75,12 @@ def solve_discrete(state: State, centers=None) -> District:
         * the sinkhorn results, the agglomerated result, the approximated cost 
     """
 
-    if centers is None:
+    if centers is None and op1:
         centers = sample_rand(state)
+    elif centers is None:
+        centers = GeoSeries([rand_guess(state) for i in range(state.num_districts)])
+        centers.set_crs(4269)
+
     K = state.num_districts
     centroids = state.centroid
     # calculate cost matrix
@@ -84,12 +88,14 @@ def solve_discrete(state: State, centers=None) -> District:
     C /= np.max(C)
     # fill in densities
     a, b = state.df['pop'].values, np.ones(K)/K
-    # scale = np.max(a)
-    # a /= scale
-    # b /= scale
+    scale = 1
+    if op2:
+        scale = np.max(a)
+        a /= scale
+        b /= scale
     # solve sinkhorn
-    res,ϵ = sinkhorn(C, a, b)
+    res,ϵ = sinkhorn(C, a/scale, b/scale)
 
     # centers.set_crs(4269)
-    district = District(state=state, res=res, centers=centers, ϵ=ϵ)
+    district = District(state=state, res=res, centers=centers, ϵ=ϵ, op3=op3)
     return district
