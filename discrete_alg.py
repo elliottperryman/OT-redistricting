@@ -27,7 +27,7 @@ from misc import rand_guess, sample_rand
 def u_v_gen(C):
     return np.random.normal(size=C.shape[0]), np.random.normal(size=C.shape[1])
 
-@nb.njit
+# @nb.njit
 def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     K = np.exp(-C/ϵ)
     for i in range(MAX_ITER):
