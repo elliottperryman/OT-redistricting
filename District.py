@@ -34,8 +34,7 @@ class District():
     def plot(self, show=True, save_filename=None):
         self.dissolve()
         self.dissolved.plot(
-            column=self.dissolved.index.values, categorical=True, legend=True#,
-            #legend_kwds={'labels':['District %d' % i for i in range(1,self.state.num_districts+1)]}
+            column=self.dissolved.index.values, categorical=True 
         )
         plt.ylabel('Longitude')
         plt.xlabel('Latitude')
