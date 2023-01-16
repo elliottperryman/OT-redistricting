@@ -2,6 +2,9 @@ import geopandas
 import matplotlib.pyplot as plt
 from state_district_count import state_district_count
 from state_name_by_number import state_name_by_number
+from scipy.ndimage import gaussian_filter
+
+OPT_SIGMA = 0.22997755
 
 class State():
     def __init__(self, state_num, lvl='tract', discrete=True):
@@ -24,7 +27,7 @@ class State():
                 'county': df['COUNTYFP20'].astype(int),
                 'tract': df['TRACTCE20'].astype(int), 
                 'block': df['BLOCKCE20'].astype(int),
-                'pop': df['POP20'].astype(float)/self.total_people, 
+                'pop': gaussian_filter(df['POP20'].astype(float)/self.total_people, sigma=OPT_SIGMA), 
                 'geometry': df['geometry'], 
                 })
             # create hierarchy of structures
