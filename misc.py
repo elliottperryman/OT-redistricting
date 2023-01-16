@@ -30,7 +30,7 @@ def plot_list_of_districts(districts):
     scores = []
     for i,d in enumerate(districts):
         num = d.state.state_num
-        d.plot(save_filename='data/state_'+str(num)+'_district_'+str(i))
+        d.plot(save_filename='figs/state_'+str(num)+'_district_'+str(i))
         print(d)
         scores.append(d.score())
         print(d.dissolved.head())
@@ -42,4 +42,4 @@ def plot_list_of_districts(districts):
     plt.title('Summed distance to center vs iteration')
     plt.ylabel(r'$\sum_i \alpha_i * ||d_i - c||$')
     plt.xlabel('iteration')
-    plt.savefig('data/state_'+str(num)+'_scores', bbox_inches='tight', transparent=True)
+    plt.savefig('figs/state_'+str(num)+'_scores', bbox_inches='tight', transparent=True)

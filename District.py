@@ -36,8 +36,9 @@ class District():
         self.dissolved.plot(
             column=self.dissolved.index.values, categorical=True 
         )
-        plt.ylabel('Longitude')
-        plt.xlabel('Latitude')
+        # plt.ylabel('Longitude')
+        # plt.xlabel('Latitude')
+        plt.axis('off')
         plt.title(self.state.pretty_name)
         plt.scatter([_.x for _ in self.old_centers], [_.y for _ in self.old_centers], marker='x', color='red')
         if show and save_filename is None:
