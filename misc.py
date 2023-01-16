@@ -3,10 +3,13 @@ Algorithms for solving redistricting by optimal transport
 """
 
 ## Standard imports
+import json
 import numpy as np
 import shapely
 from geopandas import GeoSeries
 from State import State
+import matplotlib.pyplot as plt
+
 def rand_guess(state):
     """
     rand_guess puts a point randomly in the box surrounding the state
@@ -22,3 +25,21 @@ def sample_rand(state:State):
     samples =  GeoSeries(state.centroid.values[chosen])
     samples.set_crs(4269)
     return samples
+
+def plot_list_of_districts(districts):
+    scores = []
+    for i,d in enumerate(districts):
+        num = d.state.state_num
+        d.plot(save_filename='data/state_'+str(num)+'_district_'+str(i))
+        print(d)
+        scores.append(d.score())
+        print(d.dissolved.head())
+    with open('data/state_'+str(num)+'_scores.json', 'w') as file:
+        file.write(json.dumps(scores))
+    plt.close()
+    plt.gca().clear()
+    plt.plot(list(range(1,len(scores)+1)), scores)
+    plt.title('Summed distance to center vs iteration')
+    plt.ylabel(r'$\sum_i \alpha_i * ||d_i - c||$')
+    plt.xlabel('iteration')
+    plt.savefig('data/state_'+str(num)+'_scores', bbox_inches='tight', transparent=True)

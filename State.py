@@ -34,7 +34,7 @@ class State():
             }
             self.df = df.dissolve(by=lvl, aggfunc=agg)
             self._state_geometry = None
-            self.df = df[['pop', 'geometry']]
+            self.df = self.df[['pop', 'geometry']]
             self.new_crs = self.df.estimate_utm_crs()
             self.old_crs = self.df.crs
             self.centroid = self.df.centroid
