@@ -4,13 +4,11 @@ Algorithms for solving redistricting by optimal transport
 
 ## Standard imports
 import numpy as np
-import numba as nb # compile sinkhorn for speed
-from shapely.geometry import Point
 from geopandas import GeoSeries
 
 from State import State
 from District import District
-from misc import rand_guess, sample_rand
+from misc import rand_guess
 
 """
     The next section is a little confusing. sinkhorn runs the
@@ -27,7 +25,7 @@ from misc import rand_guess, sample_rand
 def u_v_gen(C):
     return np.random.normal(size=C.shape[0]), np.random.normal(size=C.shape[1])
 
-@nb.njit
+# @nb.njit
 def base_sinkhorn(C, ϵ, a, b, u, v, MAX_ITER):
     K = np.exp(-C/ϵ)
     for i in range(MAX_ITER):
@@ -74,9 +72,10 @@ def solve_discrete(state: State, centers=None) -> District:
     returns:
         * the sinkhorn results, the agglomerated result, the approximated cost 
     """
-
     if centers is None:
-        centers = sample_rand(state)
+        centers = GeoSeries([rand_guess(state) for i in range(state.num_districts)])
+        centers.set_crs(4269)
+
     K = state.num_districts
     centroids = state.centroid
     # calculate cost matrix
@@ -84,9 +83,6 @@ def solve_discrete(state: State, centers=None) -> District:
     C /= np.max(C)
     # fill in densities
     a, b = state.df['pop'].values, np.ones(K)/K
-    # scale = np.max(a)
-    # a /= scale
-    # b /= scale
     # solve sinkhorn
     res,ϵ = sinkhorn(C, a, b)
 
