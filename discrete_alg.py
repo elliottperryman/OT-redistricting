@@ -4,13 +4,11 @@ Algorithms for solving redistricting by optimal transport
 
 ## Standard imports
 import numpy as np
-import numba as nb # compile sinkhorn for speed
-from shapely.geometry import Point
 from geopandas import GeoSeries
 
 from State import State
 from District import District
-from misc import rand_guess, sample_rand
+from misc import rand_guess
 
 """
     The next section is a little confusing. sinkhorn runs the

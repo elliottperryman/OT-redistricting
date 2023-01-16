@@ -8,6 +8,10 @@ class District():
     def __init__(self, state: State, res, centers, ϵ:float):
         self.state = state
         self.res = res
+        self.rounded_res = np.empty_like(res)
+        for i,m in enumerate(np.argmax(self.res,1)):
+            self.rounded_res[i,:] = 0
+            self.rounded_res[i,m] = self.res[i].sum()
         self.dissolved = None
         self.old_centers = centers
         self.ϵ = ϵ
@@ -21,7 +25,7 @@ class District():
         self._score = None
     def score(self):
         if self._score is None:
-            self._score = np.sum(np.array([self.state.centroid.distance(p) for p in self.old_centers]).T * self.res)
+            self._score = np.sum(np.array([self.state.centroid.distance(p) for p in self.old_centers]).T * self.rounded_res)
         return self._score
 
     def dissolve(self):
